@@ -33,15 +33,20 @@ func printPermuation(permutation []int) {
 	fmt.Println("")
 }
 
+func measureTime(f func()) (float64) {
+	start := time.Now()
+	f()
+	elapsed := time.Since(start)
+	return elapsed.Seconds()
+}
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	perm := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	for i := 0; i < 1000; i++ {
-		randomPermutation(perm)
-		printPermuation(perm)
-	}
-	// randomPermutation(perm)
-	// printPermuation(perm)
-	// a, b := randomPair(len(perm))
-	// fmt.Println(a, b)
+	randomPermutation(perm)
+	printPermuation(perm)
+	a, b := randomPair(len(perm))
+	fmt.Println(a, b)
+	elapsed := measureTime(func() {time.Sleep(2 * time.Second)})
+	fmt.Println(elapsed)
 }
