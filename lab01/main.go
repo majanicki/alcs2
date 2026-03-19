@@ -1,13 +1,14 @@
 package main
+
 import (
 	"fmt"
 	"math/rand"
-	"time"
 	"os"
-	"math"
+	"sort"
+	"time"
 )
 
-func random(n int) (int) {
+func random(n int) int {
 	return rand.Intn(n)
 }
 
@@ -24,7 +25,7 @@ func randomPermutation(permutation []int) {
 
 func randomPair(n int) (a, b int) {
 	a = random(n)
-	b = (a + random(n - 1) + 1) % n
+	b = (a + random(n-1) + 1) % n
 	return
 }
 
@@ -35,8 +36,12 @@ func printPermuation(permutation []int) {
 	fmt.Println("")
 }
 
+func swap(permutation []int, i, j int) {
+	permutation[i], permutation[j] = permutation[j], permutation[i]
+}
+
 // Think about whether we want to make this more inline with what we discussed at labs
-func measureTime(f func()) (float64) {
+func measureTime(f func()) float64 {
 	start := time.Now()
 	f()
 	elapsed := time.Since(start)
@@ -46,7 +51,7 @@ func measureTime(f func()) (float64) {
 // We should read data with `make` allocations
 
 // Heuristic:
-// Prof: Average rows and columns and match lowest average with highest average 
+// Prof: Average rows and columns and match lowest average with highest average
 // Other: Pick closest with highest flow - this one is okay
 
 // for deltas we are changing two rows and two columns
@@ -82,73 +87,67 @@ func loadMatrix(file *os.File, n int) (A []int) {
 	return
 }
 
-func loadData(filename string) (A, B []int) {
+func loadData(filename string) (n int, A, B []int) {
 	file, err := os.Open(filename)
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
 
-	var n int
 	if _, err = fmt.Fscan(file, &n); err != nil {
 		panic(err)
 	}
 	A = loadMatrix(file, n)
 	B = loadMatrix(file, n)
-	fmt.Println(B)
 	return
 }
 
-func constructInitPermutation( A, B []int, n int) (permuation []int) {
+func constructInitPermutation(A, B []int, n int) (permutation []int) {
 	permutation = make([]int, n)
-	minDistance := math.MaxInt
-	var posI, posJ int
+
+	locationScore := make([]int, n)
+	objectScore := make([]int, n)
+
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
-			if j == i {
-				continue
-			}
-			dist := A[i * n + j]
-			if dist <= minDistance {
-				minDistance = dist
-				posI = i
-				posJ = j
-			}
+			locationScore[i] += A[i*n+j] + A[j*n+i]
+			objectScore[i] += B[i*n+j] + B[j*n+i]
 		}
 	}
-	maxInteraction := 0
-	var objectI, objectJ int
+
+	locationOrder := make([]int, n)
+	objectOrder := make([]int, n)
 	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			if j == i {
-				continue
-			}
-			inter := B[i * n + j]
-			if inter <= maxInteraction {
-				maxInteraction = inter
-				objectI = i
-				objectJ = j
-			}
-		}
+		locationOrder[i] = i
+		objectOrder[i] = i
 	}
-	permutation[posI] = objectI
-	permutation[posJ] = objectJ
+
+	sort.Slice(locationOrder, func(i, j int) bool {
+		return locationScore[locationOrder[i]] < locationScore[locationOrder[j]]
+	})
+	sort.Slice(objectOrder, func(i, j int) bool {
+		return objectScore[objectOrder[i]] > objectScore[objectOrder[j]]
+	})
+
+	for k := 0; k < n; k++ {
+		permutation[locationOrder[k]] = objectOrder[k]
+	}
+
+	return
 }
 
-
 func main() {
-	rand.Seed(time.Now().UnixNano())
-	// perm := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	// randomPermutation(perm)
-	// printPermuation(perm)
-	// a, b := randomPair(len(perm))
-	// fmt.Println(a, b)
-	// elapsed := measureTime(func() {time.Sleep(2 * time.Millisecond)})
-	// fmt.Println(elapsed)
-	
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+
+
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: program <data file>")
 		return
 	}
-	loadData(os.Args[1])
+
+	n, A, B := loadData(os.Args[1])
+
+	permutation := constructInitPermutation(A, B, n)
+	printPermuation(permutation)
+
 }
