@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+type localSearchResult struct {
+	permutation []int
+	quality     int
+	iterations  int
+	deltaEvals  int
+	runtime     float64
+}
+
 func random(n int) int {
 	return rand.Intn(n)
 }
@@ -38,6 +46,46 @@ func printPermuation(permutation []int) {
 
 func swap(permutation []int, i, j int) {
 	permutation[i], permutation[j] = permutation[j], permutation[i]
+}
+
+func clonePermutation(permutation []int) []int {
+	copyPermutation := make([]int, len(permutation))
+	copy(copyPermutation, permutation)
+	return copyPermutation
+}
+
+func evaluate(permutation, A, B []int, n int) int {
+	quality := 0
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			quality += A[i*n+j] * B[permutation[i]*n+permutation[j]]
+		}
+	}
+	return quality
+}
+
+func swapDelta(permutation, A, B []int, n, i, j int) int {
+	if i == j {
+		return 0
+	}
+
+	pi := permutation[i]
+	pj := permutation[j]
+
+	delta := (A[i*n+i] - A[j*n+j]) * (B[pj*n+pj] - B[pi*n+pi])
+	delta += (A[i*n+j] - A[j*n+i]) * (B[pj*n+pi] - B[pi*n+pj])
+
+	for k := 0; k < n; k++ {
+		if k == i || k == j {
+			continue
+		}
+
+		pk := permutation[k]
+		delta += (A[k*n+i] - A[k*n+j]) * (B[pk*n+pj] - B[pk*n+pi])
+		delta += (A[i*n+k] - A[j*n+k]) * (B[pj*n+pk] - B[pi*n+pk])
+	}
+
+	return delta
 }
 
 // Think about whether we want to make this more inline with what we discussed at labs
@@ -136,9 +184,170 @@ func constructInitPermutation(A, B []int, n int) (permutation []int) {
 	return
 }
 
-func main() {
-	rand.New(rand.NewSource(time.Now().UnixNano()))
+func greedyLocalSearch(permutation, A, B []int, n int) localSearchResult {
+	quality := evaluate(permutation, A, B, n)
+	iterations := 0
+	deltaEvals := 0
 
+	runtime := measureTime(func() {
+		for {
+			improved := false
+			offset := random(n) // randomize the starting point in the neighborhood
+
+			for step := 0; step < n-1 && !improved; step++ {
+				i := (offset + step) % n
+				for shift := 1; shift < n; shift++ {
+					j := (i + shift) % n
+					if i >= j {
+						continue
+					}
+
+					delta := swapDelta(permutation, A, B, n, i, j)
+					deltaEvals++
+					if delta < 0 {
+						swap(permutation, i, j)
+						quality += delta
+						iterations++
+						improved = true
+						break
+					}
+				}
+			}
+
+			if !improved {
+				return
+			}
+		}
+	})
+
+	return localSearchResult{
+		permutation: permutation,
+		quality:     quality,
+		iterations:  iterations,
+		deltaEvals:  deltaEvals,
+		runtime:     runtime,
+	}
+}
+
+func steepestLocalSearch(permutation, A, B []int, n int) localSearchResult {
+	quality := evaluate(permutation, A, B, n)
+	iterations := 0
+	deltaEvals := 0
+
+	runtime := measureTime(func() {
+		for {
+			bestDelta := 0
+			bestI := -1
+			bestJ := -1
+
+			for i := 0; i < n-1; i++ {
+				for j := i + 1; j < n; j++ {
+					delta := swapDelta(permutation, A, B, n, i, j)
+					deltaEvals++
+					if delta < bestDelta {
+						bestDelta = delta
+						bestI = i
+						bestJ = j
+					}
+				}
+			}
+
+			if bestDelta >= 0 {
+				return
+			}
+
+			swap(permutation, bestI, bestJ)
+			quality += bestDelta
+			iterations++
+		}
+	})
+
+	return localSearchResult{
+		permutation: permutation,
+		quality:     quality,
+		iterations:  iterations,
+		deltaEvals:  deltaEvals,
+		runtime:     runtime,
+	}
+}
+
+func randomWalkLocalSearch(permutation, A, B []int, n int, maxIterations int) localSearchResult {
+	quality := evaluate(permutation, A, B, n)
+	iterations := 0
+	deltaEvals := 0
+
+	runtime := measureTime(func() {
+		for iterations < maxIterations {
+			i := random(n)
+			j := random(n)
+			if i == j {
+				continue
+			}
+
+			delta := swapDelta(permutation, A, B, n, i, j)
+			deltaEvals++
+
+			swap(permutation, i, j)
+			quality += delta
+			iterations++
+		}
+	})
+
+	return localSearchResult{
+		permutation: permutation,
+		quality:     quality,
+		iterations:  iterations,
+		deltaEvals:  deltaEvals,
+		runtime:     runtime,
+	}
+}
+
+func randomSearch(permutation, A, B []int, n int, maxIterations int) localSearchResult {
+	bestPermutation := clonePermutation(permutation)
+	bestQuality := evaluate(bestPermutation, A, B, n)
+	currentPermutation := clonePermutation(permutation)
+	iterations := 0
+	deltaEvals := 0
+
+	runtime := measureTime(func() {
+		for iterations < maxIterations {
+
+			randomPermutation(currentPermutation)
+			currentQuality := evaluate(currentPermutation, A, B, n)
+			deltaEvals++
+
+
+			if currentQuality < bestQuality {
+				bestQuality = currentQuality
+				copy(bestPermutation, currentPermutation)
+			}
+
+			iterations++
+		}
+	})
+
+	return localSearchResult{
+		permutation: bestPermutation,
+		quality:     bestQuality,
+		iterations:  iterations,
+		deltaEvals:  deltaEvals,
+		runtime:     runtime,
+	}
+}
+
+func printResult(name string, result localSearchResult) {
+	fmt.Println(name)
+	fmt.Println("quality:", result.quality)
+	fmt.Println("permutation:")
+	printPermuation(result.permutation)
+	fmt.Println("iterations:", result.iterations)
+	fmt.Println("delta evaluations:", result.deltaEvals)
+	fmt.Println("time:", result.runtime)
+	fmt.Println("")
+}
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
 
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: program <data file>")
@@ -147,7 +356,23 @@ func main() {
 
 	n, A, B := loadData(os.Args[1])
 
-	permutation := constructInitPermutation(A, B, n)
-	printPermuation(permutation)
+	initPermutation := constructInitPermutation(A, B, n)
+	initQuality := evaluate(initPermutation, A, B, n)
+
+	fmt.Println("initial")
+	fmt.Println("quality:", initQuality)
+	fmt.Println("permutation:")
+	printPermuation(initPermutation)
+	fmt.Println("")
+
+	greedyResult := greedyLocalSearch(clonePermutation(initPermutation), A, B, n)
+	steepestResult := steepestLocalSearch(clonePermutation(initPermutation), A, B, n)
+	randomWalkResult := randomWalkLocalSearch(clonePermutation(initPermutation), A, B, n, 10000)
+	randomSearchResult := randomSearch(clonePermutation(initPermutation), A, B, n, 10000)
+
+	printResult("greedy", greedyResult)
+	printResult("steepest", steepestResult)
+	printResult("random walk", randomWalkResult)
+	printResult("random search", randomSearchResult)
 
 }
