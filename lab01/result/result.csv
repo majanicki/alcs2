@@ -1,0 +1,14 @@
+greedy/.\data\esc16a.dat,72,6,272,0
+steepest/.\data\esc16a.dat,72,3,480,0
+greedy/.\data\esc32f.dat,2,8,785,0
+steepest/.\data\esc32f.dat,2,4,2480,0.0005216
+greedy/.\data\lipa40a.dat,32008,54,4205,0.0005129
+steepest/.\data\lipa40a.dat,31987,22,17940,0.0020517
+greedy/.\data\lipa60a.dat,108387,92,15902,0.0026479
+steepest/.\data\lipa60a.dat,108389,31,56640,0.0068884
+greedy/.\data\lipa80a.dat,255295,154,29564,0.0072365
+steepest/.\data\lipa80a.dat,255461,43,139040,0.0290191
+greedy/.\data\sko100a.dat,156384,455,74326,0.0246677
+steepest/.\data\sko100a.dat,154870,128,638550,0.2185745
+greedy/.\data\tai256c.dat,44943834,283,1509419,1.3537383
+steepest/.\data\tai256c.dat,44965722,44,1468800,1.3228979

@@ -31,6 +31,15 @@ func randomPermutation(permutation []int) {
 	}
 }
 
+func constructRandomPermutation(n int) (permutation []int) {
+	permutation = make([]int, n)
+	for i := 0; i < n; i++ {
+		permutation[i] = i
+	}
+	randomPermutation(permutation)
+	return
+}
+
 func randomPair(n int) (a, b int) {
 	a = random(n)
 	b = (a + random(n-1) + 1) % n
@@ -335,6 +344,42 @@ func randomSearch(permutation, A, B []int, n int, maxIterations int) localSearch
 	}
 }
 
+func appendResultToCSV(filename string, result localSearchResult, algorithm string) error {
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+	_, err = fmt.Fprintf(file, "%s,%d,%d,%d,%v\n", algorithm, result.quality, result.iterations, result.deltaEvals, result.runtime)
+	if err != nil {
+		return fmt.Errorf("failed to write result: %w", err)
+	}
+	return nil
+}
+
+func saveResultCSV(filename string, results []localSearchResult, algorithm string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
+	defer file.Close()
+
+	_, err = fmt.Fprintf(file, "Algorithm,Quality,Iterations,DeltaEvals,Runtime\n")
+	if err != nil {
+		return fmt.Errorf("failed to write header: %w", err)
+	}
+
+	for _, result := range results {
+		_, err := fmt.Fprintf(file, "%s,%d,%d,%d,%v\n", algorithm, result.quality, result.iterations, result.deltaEvals, result.runtime)
+		if err != nil {
+			return fmt.Errorf("failed to write result: %w", err)
+		}
+	}
+
+	return nil
+}
+
+
 func printResult(name string, result localSearchResult) {
 	fmt.Println(name)
 	fmt.Println("quality:", result.quality)
@@ -356,23 +401,13 @@ func main() {
 
 	n, A, B := loadData(os.Args[1])
 
-	initPermutation := constructInitPermutation(A, B, n)
-	initQuality := evaluate(initPermutation, A, B, n)
+	randomPermutation := constructRandomPermutation(n)
 
-	fmt.Println("initial")
-	fmt.Println("quality:", initQuality)
-	fmt.Println("permutation:")
-	printPermuation(initPermutation)
-	fmt.Println("")
+	greedyResult := greedyLocalSearch(clonePermutation(randomPermutation), A, B, n)
+	steepestResult := steepestLocalSearch(clonePermutation(randomPermutation), A, B, n)
 
-	greedyResult := greedyLocalSearch(clonePermutation(initPermutation), A, B, n)
-	steepestResult := steepestLocalSearch(clonePermutation(initPermutation), A, B, n)
-	randomWalkResult := randomWalkLocalSearch(clonePermutation(initPermutation), A, B, n, 10000)
-	randomSearchResult := randomSearch(clonePermutation(initPermutation), A, B, n, 10000)
+	appendResultToCSV(".\\result\\result.csv", greedyResult, "greedy/" + os.Args[1])
+	appendResultToCSV(".\\result\\result.csv", steepestResult, "steepest/" + os.Args[1])
 
-	printResult("greedy", greedyResult)
-	printResult("steepest", steepestResult)
-	printResult("random walk", randomWalkResult)
-	printResult("random search", randomSearchResult)
 
 }
