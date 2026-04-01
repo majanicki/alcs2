@@ -1,19 +1,22 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
 	"os"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 )
 
 type localSearchResult struct {
-	permutation []int
+	Permutation []int
 	quality     int
 	iterations  int
 	deltaEvals  int
-	runtime     float64
+	runtime     int64
 }
 
 func random(n int) int {
@@ -98,11 +101,11 @@ func swapDelta(permutation, A, B []int, n, i, j int) int {
 }
 
 // Think about whether we want to make this more inline with what we discussed at labs
-func measureTime(f func()) float64 {
+func measureTime(f func()) int64 {
 	start := time.Now()
 	f()
 	elapsed := time.Since(start)
-	return elapsed.Seconds()
+	return int64(elapsed.Nanoseconds())
 }
 
 // We should read data with `make` allocations
@@ -157,6 +160,23 @@ func loadData(filename string) (n int, A, B []int) {
 	A = loadMatrix(file, n)
 	B = loadMatrix(file, n)
 	return
+}
+
+func heuristicPermutation(permutation, A, B []int, n int) localSearchResult {
+
+	runtime := measureTime(func() {
+		permutation = constructInitPermutation(A, B, n)
+	})
+
+	quality := evaluate(permutation, A, B, n)
+
+	return localSearchResult{
+		Permutation: permutation,
+		quality:     quality,
+		iterations:  0,
+		deltaEvals:  0,
+		runtime:     runtime,
+	}
 }
 
 func constructInitPermutation(A, B []int, n int) (permutation []int) {
@@ -230,7 +250,7 @@ func greedyLocalSearch(permutation, A, B []int, n int) localSearchResult {
 	})
 
 	return localSearchResult{
-		permutation: permutation,
+		Permutation: permutation,
 		quality:     quality,
 		iterations:  iterations,
 		deltaEvals:  deltaEvals,
@@ -272,7 +292,7 @@ func steepestLocalSearch(permutation, A, B []int, n int) localSearchResult {
 	})
 
 	return localSearchResult{
-		permutation: permutation,
+		Permutation: permutation,
 		quality:     quality,
 		iterations:  iterations,
 		deltaEvals:  deltaEvals,
@@ -280,13 +300,14 @@ func steepestLocalSearch(permutation, A, B []int, n int) localSearchResult {
 	}
 }
 
-func randomWalkLocalSearch(permutation, A, B []int, n int, maxIterations int) localSearchResult {
+func randomWalkLocalSearch(permutation, A, B []int, n int, maxDuration time.Duration) localSearchResult {
 	quality := evaluate(permutation, A, B, n)
 	iterations := 0
 	deltaEvals := 0
 
 	runtime := measureTime(func() {
-		for iterations < maxIterations {
+		deadline := time.Now().Add(maxDuration)
+		for time.Now().Before(deadline) {
 			i := random(n)
 			j := random(n)
 			if i == j {
@@ -303,7 +324,7 @@ func randomWalkLocalSearch(permutation, A, B []int, n int, maxIterations int) lo
 	})
 
 	return localSearchResult{
-		permutation: permutation,
+		Permutation: permutation,
 		quality:     quality,
 		iterations:  iterations,
 		deltaEvals:  deltaEvals,
@@ -311,7 +332,7 @@ func randomWalkLocalSearch(permutation, A, B []int, n int, maxIterations int) lo
 	}
 }
 
-func randomSearch(permutation, A, B []int, n int, maxIterations int) localSearchResult {
+func randomSearch(permutation, A, B []int, n int, maxDuration time.Duration) localSearchResult {
 	bestPermutation := clonePermutation(permutation)
 	bestQuality := evaluate(bestPermutation, A, B, n)
 	currentPermutation := clonePermutation(permutation)
@@ -319,12 +340,12 @@ func randomSearch(permutation, A, B []int, n int, maxIterations int) localSearch
 	deltaEvals := 0
 
 	runtime := measureTime(func() {
-		for iterations < maxIterations {
+		deadline := time.Now().Add(maxDuration)
+		for time.Now().Before(deadline) {
 
 			randomPermutation(currentPermutation)
 			currentQuality := evaluate(currentPermutation, A, B, n)
 			deltaEvals++
-
 
 			if currentQuality < bestQuality {
 				bestQuality = currentQuality
@@ -336,7 +357,7 @@ func randomSearch(permutation, A, B []int, n int, maxIterations int) localSearch
 	})
 
 	return localSearchResult{
-		permutation: bestPermutation,
+		Permutation: bestPermutation,
 		quality:     bestQuality,
 		iterations:  iterations,
 		deltaEvals:  deltaEvals,
@@ -344,70 +365,186 @@ func randomSearch(permutation, A, B []int, n int, maxIterations int) localSearch
 	}
 }
 
-func appendResultToCSV(filename string, result localSearchResult, algorithm string) error {
+func appendResultToCSV(filename string, result localSearchResult, algorithm string, number int, per []int, optimum []int, opt int, obj_val int) error {
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
-	_, err = fmt.Fprintf(file, "%s,%d,%d,%d,%v\n", algorithm, result.quality, result.iterations, result.deltaEvals, result.runtime)
+	_, err = fmt.Fprintf(file, "%s,%d,%d,%d,%d,%v,%v,%v,%d,%d\n", algorithm, number, result.quality, result.iterations, result.deltaEvals, result.runtime, per, optimum, opt, obj_val)
 	if err != nil {
 		return fmt.Errorf("failed to write result: %w", err)
 	}
 	return nil
 }
 
-func saveResultCSV(filename string, results []localSearchResult, algorithm string) error {
-	file, err := os.Create(filename)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
-	}
-	defer file.Close()
+// func saveResultCSV(filename string, results []localSearchResult, algorithm string, number int) error {
+// 	file, err := os.Create(filename)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to create file: %w", err)
+// 	}
+// 	defer file.Close()
 
-	_, err = fmt.Fprintf(file, "Algorithm,Quality,Iterations,DeltaEvals,Runtime\n")
-	if err != nil {
-		return fmt.Errorf("failed to write header: %w", err)
-	}
+// 	_, err = fmt.Fprintf(file, "Algorithm,Number,Quality,Iterations,DeltaEvals,Runtime\n")
+// 	if err != nil {
+// 		return fmt.Errorf("failed to write header: %w", err)
+// 	}
 
-	for _, result := range results {
-		_, err := fmt.Fprintf(file, "%s,%d,%d,%d,%v\n", algorithm, result.quality, result.iterations, result.deltaEvals, result.runtime)
-		if err != nil {
-			return fmt.Errorf("failed to write result: %w", err)
-		}
-	}
+// 	for _, result := range results {
+// 		_, err := fmt.Fprintf(file, "%s,%d,%d,%d,%d,%v\n", algorithm, number, result.quality, result.iterations, result.deltaEvals, result.runtime)
+// 		if err != nil {
+// 			return fmt.Errorf("failed to write result: %w", err)
+// 		}
+// 	}
 
-	return nil
-}
-
+// 	return nil
+// }
 
 func printResult(name string, result localSearchResult) {
 	fmt.Println(name)
 	fmt.Println("quality:", result.quality)
 	fmt.Println("permutation:")
-	printPermuation(result.permutation)
+	printPermuation(result.Permutation)
 	fmt.Println("iterations:", result.iterations)
 	fmt.Println("delta evaluations:", result.deltaEvals)
 	fmt.Println("time:", result.runtime)
 	fmt.Println("")
 }
 
+func perseFilename(filename string) (n int, objective int, permutation []int) {
+	file, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lineNum := 0
+
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+
+		parts := strings.Fields(line)
+		if lineNum == 0 {
+			if len(parts) < 2 {
+				panic("invalid solution file header")
+			}
+
+			nParsed, err := strconv.Atoi(parts[0])
+			if err != nil {
+				panic(err)
+			}
+
+			objParsed, err := strconv.Atoi(parts[1])
+			if err != nil {
+				panic(err)
+			}
+
+			n = nParsed
+			objective = objParsed
+			permutation = make([]int, 0, n)
+		} else {
+			for _, part := range parts {
+				value, err := strconv.Atoi(part)
+				if err != nil {
+					panic(err)
+				}
+				permutation = append(permutation, value-1)
+			}
+		}
+
+		lineNum++
+	}
+
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
+
+	if len(permutation) != n {
+		panic(fmt.Sprintf("permutation size mismatch: expected %d, got %d", n, len(permutation)))
+	}
+
+	return
+}
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: program <data file>")
-		return
+
+	folder := "data"
+
+	// open file times and read data from files
+
+
+	files, err := os.ReadDir(folder)
+	if err != nil {
+		fmt.Println("failed to read data folder:", err)
 	}
 
-	n, A, B := loadData(os.Args[1])
+	fileMap := make(map[string][2]string)
 
-	randomPermutation := constructRandomPermutation(n)
+	for _, file := range files {
 
-	greedyResult := greedyLocalSearch(clonePermutation(randomPermutation), A, B, n)
-	steepestResult := steepestLocalSearch(clonePermutation(randomPermutation), A, B, n)
+		name := file.Name()
 
-	appendResultToCSV(".\\result\\result.csv", greedyResult, "greedy/" + os.Args[1])
-	appendResultToCSV(".\\result\\result.csv", steepestResult, "steepest/" + os.Args[1])
+		key := name[:len(name)-4]
+		entry := fileMap[key]
+		if strings.HasSuffix(name, ".sln") {
+			entry[1] = folder + "\\" + name
+		} else {
+			entry[0] = folder + "\\" + name
+		}
+		fileMap[key] = entry
 
+	}
+
+	times := map[string]int{
+		"esc16a": 0,
+		"lipa40a": 3,
+		"lipa60a": 9,
+		"lipa80a": 61,
+		"tai150b": 1479,
+		"esc32f": 0,
+		"sko100a": 222,
+		"sko90": 94,
+		"tai100b": 309,
+		"tai256c": 1880,
+	}
+
+
+	for key, paths := range fileMap {
+
+		// if key != "lipa40a" && key != "lipa80a" {
+		// 	continue
+		// }
+
+		n, A, B := loadData(paths[0])
+		_, opt, optimumPermutation := perseFilename(paths[1])
+
+		for i := 0; i < 10; i++ {
+
+			randomPermutation := constructRandomPermutation(n)
+
+			obj_val := evaluate(randomPermutation, A, B, n)
+
+
+			heuristicResult := heuristicPermutation(clonePermutation(randomPermutation), A, B, n)
+			greedyResult := greedyLocalSearch(clonePermutation(randomPermutation), A, B, n)
+			steepestResult := steepestLocalSearch(clonePermutation(randomPermutation), A, B, n)
+			randomResult := randomSearch(clonePermutation(randomPermutation), A, B, n, time.Duration(times[key])*time.Millisecond)
+			randomWalkResult := randomWalkLocalSearch(clonePermutation(randomPermutation), A, B, n, time.Duration(times[key])*time.Millisecond)
+			
+			appendResultToCSV(".\\result\\ex2.csv", greedyResult, "greedy/"+key, i+1, greedyResult.Permutation, optimumPermutation, opt, obj_val)
+			appendResultToCSV(".\\result\\ex2.csv", steepestResult, "steepest/"+key, i+1, steepestResult.Permutation, optimumPermutation, opt, obj_val)
+			appendResultToCSV(".\\result\\ex2.csv", randomResult, "random/"+key, i+1, randomResult.Permutation, optimumPermutation, opt, obj_val)
+			appendResultToCSV(".\\result\\ex2.csv", randomWalkResult, "randomWalk/"+key, i+1, randomWalkResult.Permutation, optimumPermutation, opt, obj_val)
+			appendResultToCSV(".\\result\\ex2.csv", heuristicResult, "heuristic/"+key, i+1, heuristicResult.Permutation, optimumPermutation, opt, obj_val)
+			
+
+		}
+	}
 
 }
