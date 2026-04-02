@@ -1,0 +1,3 @@
+1. Użyj "broken scale" dla wykresów, żeby skala miała sens, dla wykresów gdzie wyniki nie są widoczne. Przesuń zakresy błędu lewo, prawo jitter - zmień może na std (znowu)
+2. SA/TS raport jest rozwnięciem obecnego raportu. Porównujemy ex2 z raportu pierwszego tylko (czyli mniejszy zakres prac)
+3. TA search - długość listy taboo. Dla simulated anealing powinniśmy dostować chłodzenie i jego cykl. Wszystko co powinniśmy wiedzieć jest na ekursach.
