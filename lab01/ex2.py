@@ -15,9 +15,10 @@ gready_sko_end = []
 greedy_tai_end = []
 steepest_sko_end = []
 steepest_tai_end = []
+showfliers = False
 
 data = {}
-with open('.\\result\\ex2.csv', 'r') as file:
+with open('./result/ex2.csv', 'r') as file:
 
     for line in file:
         tab.append(line.strip().split(','))
@@ -40,8 +41,6 @@ for i in range(1, len(tab)):
         'time': float(tab[i][5]),
         'optimum': float(tab[i][8]),
     })
-
-print(data['tai150b'])
 
 results = {}
 for instance, algs in data.items():
@@ -69,10 +68,10 @@ for instance, algs in results.items():
     for alg, runs in algs.items():
         data_to_plot.append([run['quality'] for run in runs])
         labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels)
+    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
     ax.set_title(f'Quality for {instance}')
     ax.set_ylabel('Quality (%)')
-    plt.savefig(f'.\\ex2\\quality_{instance}.png')
+    plt.savefig(f'./ex2/quality_{instance}.png')
 
 # for each instanece plot box plot for efficiency
 for instance, algs in results.items():
@@ -82,10 +81,10 @@ for instance, algs in results.items():
     for alg, runs in algs.items():
         data_to_plot.append([run['efficiency'] for run in runs])
         labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels)
+    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
     ax.set_title(f'Efficiency for {instance}')
     ax.set_ylabel('Efficiency (%)')
-    plt.savefig(f'.\\ex2\\efficiency_{instance}.png')
+    plt.savefig(f'./ex2/efficiency_{instance}.png')
 
 # for each instanece plot box plot for time
 for instance, algs in results.items():
@@ -95,10 +94,10 @@ for instance, algs in results.items():
     for alg, runs in algs.items():
         data_to_plot.append([run['time'] for run in runs])
         labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels)
+    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
     ax.set_title(f'Time for {instance}')
     ax.set_ylabel('Time (s)')
-    plt.savefig(f'.\\ex2\\time_{instance}.png')
+    plt.savefig(f'./ex2/time_{instance}.png')
 
 # for each instanece plot box plot for iterations
 for instance, algs in results.items():
@@ -108,10 +107,10 @@ for instance, algs in results.items():
     for alg, runs in algs.items():
         data_to_plot.append([run['iterations'] for run in runs])
         labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels)
+    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
     ax.set_title(f'Iterations for {instance}')
     ax.set_ylabel('Iterations')
-    plt.savefig(f'.\\ex2\\iterations_{instance}.png')
+    plt.savefig(f'./ex2/iterations_{instance}.png')
 
 
 # for each instanece plot box plot for evaluations
@@ -122,7 +121,7 @@ for instance, algs in results.items():
     for alg, runs in algs.items():
         data_to_plot.append([run['evaluations'] for run in runs])
         labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels)
+    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
     ax.set_title(f'Evaluations for {instance}')
     ax.set_ylabel('Evaluations')
-    plt.savefig(f'.\\ex2\\evaluations_{instance}.png')
+    plt.savefig(f'./ex2/evaluations_{instance}.png')
