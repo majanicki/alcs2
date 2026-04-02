@@ -60,6 +60,8 @@ for instance, algs in data.items():
 
 import matplotlib.pyplot as plt
 
+for instance in results:
+    results[instance] = dict(sorted(results[instance].items()))
 # for each instanece plot box plot for quality
 for instance, algs in results.items():
     fig, ax = plt.subplots()
@@ -92,6 +94,8 @@ for instance, algs in results.items():
     data_to_plot = []
     labels = []
     for alg, runs in algs.items():
+        if alg not in ["greedy", "steepest", "heuristic"]:
+            continue
         data_to_plot.append([run['time'] for run in runs])
         labels.append(alg)
     ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
@@ -105,11 +109,13 @@ for instance, algs in results.items():
     data_to_plot = []
     labels = []
     for alg, runs in algs.items():
+        if alg not in ["greedy", "steepest", "heuristic"]:
+            continue
         data_to_plot.append([run['iterations'] for run in runs])
         labels.append(alg)
     ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
-    ax.set_title(f'Iterations for {instance}')
-    ax.set_ylabel('Iterations')
+    ax.set_title(f'Steps for {instance}')
+    ax.set_ylabel('Steps')
     plt.savefig(f'./ex2/iterations_{instance}.png')
 
 
