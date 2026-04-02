@@ -43,30 +43,14 @@ where:
 
 This measure represents the relative percentage deviation from the optimum.
 
-![](.\ex2\quality_esc16a.png)
-![](.\ex2\quality_esc32f.png)
-![](.\ex2\quality_lipa40a.png)
-![](.\ex2\quality_lipa60a.png)
-![](.\ex2\quality_lipa80a.png)
-![](.\ex2\quality_sko90.png)
-![](.\ex2\quality_sko100a.png)
-![](.\ex2\quality_tai100b.png)
-![](.\ex2\quality_tai150b.png)
-![](.\ex2\quality_tai256c.png)
+![](.\ex2\quality_aggregated.png)
+
 
 
 #### Running Time
 
-![](.\ex2\time_esc16a.png)
-![](.\ex2\time_esc32f.png)
-![](.\ex2\time_lipa40a.png)
-![](.\ex2\time_lipa60a.png)
-![](.\ex2\time_lipa80a.png)
-![](.\ex2\time_sko90.png)
-![](.\ex2\time_sko100a.png)
-![](.\ex2\time_tai100b.png)
-![](.\ex2\time_tai150b.png)
-![](.\ex2\time_tai256c.png)
+![](.\ex2\time_aggregated.png)
+
 
 #### Efficiency
 
@@ -80,43 +64,19 @@ where:
 
 This measure captures the trade-off between solution quality and computational time, as it rewards algorithms that achieve low error quickly, while penalizing those that are either slow or produce poor-quality solutions; additionally, it enables meaningful comparison between fundamentally different approaches (e.g., fast random methods versus slower local search methods) when solving instances of the Quadratic Assignment Problem.
 
-![](.\ex2\time_esc16a.png)
-![](.\ex2\time_esc32f.png)
-![](.\ex2\time_lipa40a.png)
-![](.\ex2\time_lipa60a.png)
-![](.\ex2\time_lipa80a.png)
-![](.\ex2\time_sko90.png)
-![](.\ex2\time_sko100a.png)
-![](.\ex2\time_tai100b.png)
-![](.\ex2\time_tai150b.png)
-![](.\ex2\time_tai256c.png)
+![](.\ex2\efficiency_aggregated.png)
 
-#### Number of Iterations
 
-![](.\ex2\iterations_esc16a.png)
-![](.\ex2\iterations_esc32f.png)
-![](.\ex2\iterations_lipa40a.png)
-![](.\ex2\iterations_lipa60a.png)
-![](.\ex2\iterations_lipa80a.png)
-![](.\ex2\iterations_sko90.png)
-![](.\ex2\iterations_sko100a.png)
-![](.\ex2\iterations_tai100b.png)
-![](.\ex2\iterations_tai150b.png)
-![](.\ex2\iterations_tai256c.png)
+#### Number of Steps
+
+![](.\ex2\iterations_aggregated.png)
+
 
 #### Number of Evaluations
 
 
-![](.\ex2\evaluations_esc16a.png)
-![](.\ex2\evaluations_esc32f.png)
-![](.\ex2\evaluations_lipa40a.png)
-![](.\ex2\evaluations_lipa60a.png)
-![](.\ex2\evaluations_lipa80a.png)
-![](.\ex2\evaluations_sko90.png)
-![](.\ex2\evaluations_sko100a.png)
-![](.\ex2\evaluations_tai100b.png)
-![](.\ex2\evaluations_tai150b.png)
-![](.\ex2\evaluations_tai256c.png)
+![](.\ex2\evaluations_aggregated.png)
+
 
 ### Discovering the structure of the search space and the optimized function
 

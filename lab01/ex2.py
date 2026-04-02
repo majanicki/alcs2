@@ -24,7 +24,6 @@ with open('./result/ex2.csv', 'r') as file:
         tab.append(line.strip().split(','))
 
 for i in range(1, len(tab)):
-    # if tab[i][0] contains 'greedy'
     type_alg, instance = tab[i][0].split('/')
     if instance not in data:
         data[instance] = {}
@@ -59,75 +58,72 @@ for instance, algs in data.items():
             })
 
 import matplotlib.pyplot as plt
+import numpy as np
+import re
 
-for instance in results:
-    results[instance] = dict(sorted(results[instance].items()))
-# for each instanece plot box plot for quality
-for instance, algs in results.items():
-    fig, ax = plt.subplots()
-    data_to_plot = []
-    labels = []
-    for alg, runs in algs.items():
-        data_to_plot.append([run['quality'] for run in runs])
-        labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
-    ax.set_title(f'Quality for {instance}')
-    ax.set_ylabel('Quality (%)')
-    plt.savefig(f'./ex2/quality_{instance}.png')
+metrics = ['quality', 'efficiency', 'time', 'iterations', 'evaluations']
+ylabels = {
+    'quality': 'Quality (%)',
+    'efficiency': 'Efficiency (%)',
+    'time': 'Time (s)',
+    'iterations': 'Steps',
+    'evaluations': 'Evaluations'
+}
+step_algs = ["greedy", "steepest"]
 
-# for each instanece plot box plot for efficiency
-for instance, algs in results.items():
-    fig, ax = plt.subplots()
-    data_to_plot = []
-    labels = []
-    for alg, runs in algs.items():
-        data_to_plot.append([run['efficiency'] for run in runs])
-        labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
-    ax.set_title(f'Efficiency for {instance}')
-    ax.set_ylabel('Efficiency (%)')
-    plt.savefig(f'./ex2/efficiency_{instance}.png')
+def extract_number(s):
+    match = re.search(r'\d+', s)
+    return int(match.group()) if match else float('inf')
+instances = sorted(results.keys(), key=extract_number)
 
-# for each instanece plot box plot for time
-for instance, algs in results.items():
-    fig, ax = plt.subplots()
-    data_to_plot = []
-    labels = []
-    for alg, runs in algs.items():
-        if alg not in ["greedy", "steepest", "heuristic"]:
-            continue
-        data_to_plot.append([run['time'] for run in runs])
-        labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
-    ax.set_title(f'Time for {instance}')
-    ax.set_ylabel('Time (s)')
-    plt.savefig(f'./ex2/time_{instance}.png')
-
-# for each instanece plot box plot for iterations
-for instance, algs in results.items():
-    fig, ax = plt.subplots()
-    data_to_plot = []
-    labels = []
-    for alg, runs in algs.items():
-        if alg not in ["greedy", "steepest", "heuristic"]:
-            continue
-        data_to_plot.append([run['iterations'] for run in runs])
-        labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
-    ax.set_title(f'Steps for {instance}')
-    ax.set_ylabel('Steps')
-    plt.savefig(f'./ex2/iterations_{instance}.png')
+for metric in metrics:
+    plt.figure(figsize=(10,6))
+    all_algs = set()
+    for instance in instances:
+        if metric == "iterations" or metric == "time":
+            all_algs.update([alg for alg in results[instance].keys() if alg in step_algs])
+        else:
+            all_algs.update(results[instance].keys())
+    all_algs = sorted(all_algs)
+    
+    for alg in all_algs:
+        means = []
+        stds = []
+        mins = []
+        maxs = []
+        for instance in instances:
+            if alg in results[instance]:
+                values = [run[metric] for run in results[instance][alg]]
+                if metric == "iterations" and alg == "heuristic":
+                    print(values)
+                means.append(np.mean(values))
+                stds.append(np.std(values))
+                mins.append(np.min(values))
+                maxs.append(np.max(values))
 
 
-# for each instanece plot box plot for evaluations
-for instance, algs in results.items():
-    fig, ax = plt.subplots()
-    data_to_plot = []
-    labels = []
-    for alg, runs in algs.items():
-        data_to_plot.append([run['evaluations'] for run in runs])
-        labels.append(alg)
-    ax.boxplot(data_to_plot, labels=labels, showfliers = showfliers)
-    ax.set_title(f'Evaluations for {instance}')
-    ax.set_ylabel('Evaluations')
-    plt.savefig(f'./ex2/evaluations_{instance}.png')
+        plt.errorbar(instances, means, yerr=[mins, maxs], label=alg, marker='o', capsize=5)
+
+    plt.title(f'{ylabels[metric]} Across Instances')
+    plt.xlabel('Instance')
+    plt.ylabel(ylabels[metric])
+    plt.xticks(rotation=45)
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.legend()
+    if metric == 'quality':
+        plt.yscale('symlog', linthresh=1e1)
+        plt.ylim(bottom=0)
+
+    if metric == "time":
+        plt.yscale('symlog',  linthresh=1e5)
+        plt.ylim(bottom=0)
+
+    if metric == "iterations":
+        plt.yscale('log')
+    if metric == "evaluations":
+        plt.yscale('symlog',  linthresh=1e2)
+        plt.ylim(bottom=0)
+
+    plt.tight_layout()
+    plt.savefig(f'./ex2/{metric}_aggregated.png')
+    plt.close()
