@@ -501,18 +501,18 @@ func main() {
 
 	}
 
-	times := map[string]int{
-		"esc16a": 0,
-		"lipa40a": 3,
-		"lipa60a": 9,
-		"lipa80a": 61,
-		"tai150b": 1479,
-		"esc32f": 0,
-		"sko100a": 222,
-		"sko90": 94,
-		"tai100b": 309,
-		"tai256c": 1880,
-	}
+	// times := map[string]int{
+	// 	"esc16a": 50,
+	// 	"lipa40a": 15,
+	// 	"lipa60a": 50,
+	// 	"lipa80a": 100,
+	// 	"tai150b": 2000,
+	// 	"esc32f": 50,
+	// 	"sko100a": 400,
+	// 	"sko90": 150,
+	// 	"tai100b": 400,
+	// 	"tai256c": 5000,
+	// }
 
 
 	for key, paths := range fileMap {
@@ -524,7 +524,7 @@ func main() {
 		n, A, B := loadData(paths[0])
 		_, opt, optimumPermutation := perseFilename(paths[1])
 
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 20; i++ {
 
 			randomPermutation := constructRandomPermutation(n)
 
@@ -534,14 +534,14 @@ func main() {
 			heuristicResult := heuristicPermutation(clonePermutation(randomPermutation), A, B, n)
 			greedyResult := greedyLocalSearch(clonePermutation(randomPermutation), A, B, n)
 			steepestResult := steepestLocalSearch(clonePermutation(randomPermutation), A, B, n)
-			randomResult := randomSearch(clonePermutation(randomPermutation), A, B, n, time.Duration(times[key])*time.Millisecond)
-			randomWalkResult := randomWalkLocalSearch(clonePermutation(randomPermutation), A, B, n, time.Duration(times[key])*time.Millisecond)
+			randomResult := randomSearch(clonePermutation(randomPermutation), A, B, n, time.Duration(steepestResult.runtime)*time.Nanosecond)
+			randomWalkResult := randomWalkLocalSearch(clonePermutation(randomPermutation), A, B, n, time.Duration(steepestResult.runtime)*time.Nanosecond)
 			
-			appendResultToCSV(".\\result\\ex2.csv", greedyResult, "greedy/"+key, i+1, greedyResult.Permutation, optimumPermutation, opt, obj_val)
-			appendResultToCSV(".\\result\\ex2.csv", steepestResult, "steepest/"+key, i+1, steepestResult.Permutation, optimumPermutation, opt, obj_val)
-			appendResultToCSV(".\\result\\ex2.csv", randomResult, "random/"+key, i+1, randomResult.Permutation, optimumPermutation, opt, obj_val)
-			appendResultToCSV(".\\result\\ex2.csv", randomWalkResult, "randomWalk/"+key, i+1, randomWalkResult.Permutation, optimumPermutation, opt, obj_val)
-			appendResultToCSV(".\\result\\ex2.csv", heuristicResult, "heuristic/"+key, i+1, heuristicResult.Permutation, optimumPermutation, opt, obj_val)
+			appendResultToCSV(".\\result\\ex2_t2.csv", greedyResult, "greedy/"+key, i+1, greedyResult.Permutation, optimumPermutation, opt, obj_val)
+			appendResultToCSV(".\\result\\ex2_t2.csv", steepestResult, "steepest/"+key, i+1, steepestResult.Permutation, optimumPermutation, opt, obj_val)
+			appendResultToCSV(".\\result\\ex2_t2.csv", randomResult, "random/"+key, i+1, randomResult.Permutation, optimumPermutation, opt, obj_val)
+			appendResultToCSV(".\\result\\ex2_t2.csv", randomWalkResult, "randomWalk/"+key, i+1, randomWalkResult.Permutation, optimumPermutation, opt, obj_val)
+			appendResultToCSV(".\\result\\ex2_t2.csv", heuristicResult, "heuristic/"+key, i+1, heuristicResult.Permutation, optimumPermutation, opt, obj_val)
 			
 
 		}
