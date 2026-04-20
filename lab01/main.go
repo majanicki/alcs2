@@ -150,12 +150,6 @@ func simulatedAnnealing(permutation, A, B []int, n int, _ time.Duration, args an
 	finalTemperature := 0.01
 
 	tempSampleCount := L
-	if tempSampleCount < 100 {
-		tempSampleCount = 100
-	}
-	if tempSampleCount > 2000 {
-		tempSampleCount = 2000
-	}
 
 	avgPositiveDelta := estimateAveragePositiveDelta(permutation, A, B, n, tempSampleCount)
 	deltaEvals += tempSampleCount
@@ -545,7 +539,7 @@ func produceResultsRow(filename, name string, results localSearchResult) []strin
 }
 
 func main() {
-	outputFile, err := os.Create("measurements_2.csv")
+	outputFile, err := os.Create("measurements_5.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -561,14 +555,21 @@ func main() {
 	for _, file := range files {
 		n, A, B := loadData(file)
 		params := SimulatedAnnealingParams{
-			LDivider: 10,
-			P:        10,
-			Alpha:    0.9,
+			LDivider: 	2,
+			// LDivider: 	20,
+			// P:        10,
+			// P:			15,
+			// P:			30,
+			P:			n,
+			// Alpha:    	0.95,
+			Alpha:    	0.97,
 		}
 		paramsT := TabuSearchParams{
-			maxNoImprovement: n /4,
+			// maxNoImprovement: n /4,
+			// maxNoImprovement: n / 2,
+			maxNoImprovement: n,
 		}
-		for i := 0; i < 100; i++ {
+		for i := 0; i < 10; i++ {
 			fmt.Println(file, i)
 
 			results := benchmarkAlgorithm(steepestLocalSearch, A, B, n, time.Duration(0), nil)

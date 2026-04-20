@@ -12,7 +12,7 @@ columns = {
 }
 
 instances = set()
-with open('measurements.csv', newline='') as csvfile:
+with open('measurements_5.csv', newline='') as csvfile:
     reader = csv.reader(csvfile)
 
     for row in reader:
@@ -24,6 +24,8 @@ with open('measurements.csv', newline='') as csvfile:
         for col_idx, target_dict in columns.items():
             value = int(row[col_idx])
             if alg not in target_dict:
+                # if alg == "heuristic":
+                #     continue
                 target_dict[alg] = {}
             if instance not in target_dict[alg]:
                 target_dict[alg][instance] = []
@@ -76,18 +78,18 @@ plt.yscale("log")
 plt.legend()
 plt.title("Execution Time ↓")
 plt.ylabel("Time [ms]")
-plt.savefig("ex2/time_aggregate.png")
+plt.savefig("ex2/time_aggregate_4a.png")
 plt.figure(figsize=image_size)
 
 for i, alg in enumerate(times):
     y = []
     stds = []
     for instance in instances:
-        improvment = np.array(fitnesses[alg][instance]) / optima[instance]
+        improvment = (np.array(fitnesses[alg][instance]) - optima[instance]) / optima[instance]
         f = improvment
-        print(f)
+        # print(f)
         mean = np.mean(f)
-        print(alg, mean)
+        # print(alg, mean)
         std = np.std(f)
         y.append(mean)
         stds.append(std)
@@ -104,7 +106,7 @@ plt.xticks(x, instances)
 plt.legend()
 plt.title("Quality ↓")
 plt.ylabel("Ratio to optimum [q]")
-plt.savefig("ex2/quality_aggregate.png")
+plt.savefig("ex2/quality_aggregate_4a.png")
 plt.show()
 plt.figure(figsize=image_size)
 
@@ -114,9 +116,9 @@ for i, alg in enumerate(times):
     for instance in instances:
         improvment = (np.array(initial_fitness[alg][instance]) - np.array(fitnesses[alg][instance])) / optima[instance]
         f = improvment / (np.array(times[alg][instance]) / 1e6)
-        print(f)
+        # print(f)
         mean = np.mean(f)
-        print(alg, mean)
+        # print(alg, mean)
         std = np.std(f)
         y.append(mean)
         stds.append(std)
@@ -133,7 +135,7 @@ plt.yscale("symlog",  linthresh=0.0001)
 plt.legend()
 plt.title("Efficiency ↑")
 plt.ylabel("Improvment to quality from initial solution over time [q/ms]")
-plt.savefig("ex2/efficiency_aggregate.png")
+plt.savefig("ex2/efficiency_aggregate_4a.png")
 plt.show()
 
 plt.figure(figsize=image_size)
@@ -160,7 +162,7 @@ plt.xticks(x, instances)
 plt.yscale("log")
 plt.title("Iterations")
 plt.legend()
-plt.savefig("ex2/iterations_aggregate.png")
+plt.savefig("ex2/iterations_aggregate_4a.png")
 plt.show()
 
 plt.figure(figsize=image_size)
@@ -185,5 +187,5 @@ plt.xticks(x, instances)
 plt.yscale("log")
 plt.title("Evaluations")
 plt.legend()
-plt.savefig("ex2/evaluations_aggregate.png")
+plt.savefig("ex2/evaluations_aggregate_4a.png")
 plt.show()
