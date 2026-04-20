@@ -539,7 +539,7 @@ func produceResultsRow(filename, name string, results localSearchResult) []strin
 }
 
 func main() {
-	outputFile, err := os.Create("measurements_5.csv")
+	outputFile, err := os.Create("measurements_8.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -560,14 +560,15 @@ func main() {
 			// P:        10,
 			// P:			15,
 			// P:			30,
-			P:			n,
+			// P:			n,
+			P: 	2*n,
 			// Alpha:    	0.95,
 			Alpha:    	0.97,
 		}
 		paramsT := TabuSearchParams{
 			// maxNoImprovement: n /4,
 			// maxNoImprovement: n / 2,
-			maxNoImprovement: n,
+			maxNoImprovement: 2*n,
 		}
 		for i := 0; i < 10; i++ {
 			fmt.Println(file, i)
