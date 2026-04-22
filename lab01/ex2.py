@@ -39,6 +39,17 @@ evaluations = columns[5]
 times = columns[6]
 initial_fitness = columns[7]
 
+# colors
+colors = {
+    "steepest": "#000fff",
+    "greedy": "#297dd6",
+    "random": "#ff0d00",
+    "randomWalk": "#cb343d",
+    "heuristic": "#a82dd2",
+    "tabuSearch": "#0aff00",
+    "simulatedAnnealing": "#096b28",
+}
+
 
 instances = list(instances)
 instances.sort(key=lambda x: int(re.search(r'\d+', x).group()))
@@ -71,14 +82,15 @@ for i, alg in enumerate(times):
     jitter = (i - len(times)/2) * jitter_strength
     x_jittered = x + jitter
 
-    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".")
+    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
+# add colors to the lines
 
 plt.xticks(x, instances)
 plt.yscale("log")
 plt.legend()
 plt.title("Execution Time ↓")
 plt.ylabel("Time [ms]")
-plt.savefig("ex2/time_aggregate_4a.png")
+plt.savefig("ex2/time_aggregate_8.png")
 plt.figure(figsize=image_size)
 
 for i, alg in enumerate(times):
@@ -99,14 +111,14 @@ for i, alg in enumerate(times):
     jitter = (i - len(times)/2) * jitter_strength
     x_jittered = x + jitter
 
-    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".")
+    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
 
 plt.xticks(x, instances)
 # plt.yscale("log")
 plt.legend()
 plt.title("Quality ↓")
 plt.ylabel("Ratio to optimum [q]")
-plt.savefig("ex2/quality_aggregate_4a.png")
+plt.savefig("ex2/quality_aggregate_8.png")
 plt.show()
 plt.figure(figsize=image_size)
 
@@ -128,14 +140,14 @@ for i, alg in enumerate(times):
     jitter = (i - len(times)/2) * jitter_strength
     x_jittered = x + jitter
 
-    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".")
+    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
 
 plt.xticks(x, instances)
 plt.yscale("symlog",  linthresh=0.0001)
 plt.legend()
 plt.title("Efficiency ↑")
 plt.ylabel("Improvment to quality from initial solution over time [q/ms]")
-plt.savefig("ex2/efficiency_aggregate_4a.png")
+plt.savefig("ex2/efficiency_aggregate_8.png")
 plt.show()
 
 plt.figure(figsize=image_size)
@@ -156,13 +168,13 @@ for i, alg in enumerate(iterations):
     jitter = (i - len(iterations)/2) * jitter_strength
     x_jittered = x + jitter
 
-    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".")
+    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
 
 plt.xticks(x, instances)
 plt.yscale("log")
 plt.title("Iterations")
 plt.legend()
-plt.savefig("ex2/iterations_aggregate_4a.png")
+plt.savefig("ex2/iterations_aggregate_8.png")
 plt.show()
 
 plt.figure(figsize=image_size)
@@ -181,11 +193,11 @@ for i, alg in enumerate(evaluations):
     jitter = (i - len(evaluations)/2) * jitter_strength
     x_jittered = x + jitter
 
-    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".")
+    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
 
 plt.xticks(x, instances)
 plt.yscale("log")
 plt.title("Evaluations")
 plt.legend()
-plt.savefig("ex2/evaluations_aggregate_4a.png")
+plt.savefig("ex2/evaluations_aggregate_8.png")
 plt.show()

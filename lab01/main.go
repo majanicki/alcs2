@@ -273,7 +273,7 @@ func tabuSearch(permutation, A, B []int, n int, _ time.Duration, args any) ([]in
 				deltaEvals += 1
 
 				tabu := iterations < tabuExpiry[bestI*n+bestJ]
-				aspiration := quality > quality+delta
+				aspiration := quality > bestQuality+delta
 				if tabu && !aspiration {
 					continue
 				}
@@ -556,18 +556,10 @@ func main() {
 		n, A, B := loadData(file)
 		params := SimulatedAnnealingParams{
 			LDivider: 	2,
-			// LDivider: 	20,
-			// P:        10,
-			// P:			15,
-			// P:			30,
-			// P:			n,
 			P: 	2*n,
-			// Alpha:    	0.95,
 			Alpha:    	0.97,
 		}
 		paramsT := TabuSearchParams{
-			// maxNoImprovement: n /4,
-			// maxNoImprovement: n / 2,
 			maxNoImprovement: 2*n,
 		}
 		for i := 0; i < 10; i++ {

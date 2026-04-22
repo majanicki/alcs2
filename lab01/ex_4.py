@@ -1,3 +1,4 @@
+import math
 import matplotlib.pyplot as plt
 
 
@@ -104,6 +105,70 @@ def parse_permutation(value):
         return []
     return [int(x) for x in value.replace(',', ' ').split()]
 
+
+def rank_values(values):
+    indexed_values = sorted(enumerate(values), key=lambda item: item[1])
+    ranks = [0.0] * len(values)
+    start = 0
+
+    while start < len(indexed_values):
+        end = start + 1
+        while end < len(indexed_values) and indexed_values[end][1] == indexed_values[start][1]:
+            end += 1
+
+        average_rank = (start + end - 1) / 2 + 1
+        for position in range(start, end):
+            original_index = indexed_values[position][0]
+            ranks[original_index] = average_rank
+
+        start = end
+
+    return ranks
+
+
+def spearman_rank_correlation(x_values, y_values):
+    if len(x_values) != len(y_values) or len(x_values) < 2:
+        return None
+
+    ranked_x = rank_values(x_values)
+    ranked_y = rank_values(y_values)
+    mean_x = sum(ranked_x) / len(ranked_x)
+    mean_y = sum(ranked_y) / len(ranked_y)
+    numerator = 0
+    sum_sq_x = 0
+    sum_sq_y = 0
+
+    for x_value, y_value in zip(ranked_x, ranked_y):
+        delta_x = x_value - mean_x
+        delta_y = y_value - mean_y
+        numerator += delta_x * delta_y
+        sum_sq_x += delta_x ** 2
+        sum_sq_y += delta_y ** 2
+
+    denominator = math.sqrt(sum_sq_x * sum_sq_y)
+    if denominator == 0:
+        return None
+
+    return numerator / denominator
+
+
+def plot_similarity_pair(quality, avg_similarity, optimal_similarity, title):
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    avg_correlation = spearman_rank_correlation(quality, avg_similarity)
+    optimal_correlation = spearman_rank_correlation(quality, optimal_similarity)
+
+    axes[0].scatter(quality, avg_similarity)
+    axes[0].set_title(f'{title} - Average to other solutions\nr_s = {avg_correlation:.4f}' if avg_correlation is not None else f'{title} - Average\nr_s = n/a')
+    axes[0].set_xlabel('Objective Value')
+    axes[0].set_ylabel('Similarity')
+
+    axes[1].scatter(quality, optimal_similarity)
+    axes[1].set_title(f'{title} - similarity to the Optimal solution\nr_s = {optimal_correlation:.4f}' if optimal_correlation is not None else f'{title} - Optimal\nr_s = n/a')
+    axes[1].set_xlabel('Objective Value')
+
+    fig.tight_layout()
+    plt.show()
+
 greedy_sko_permutations = []
 greedy_tai_permutations = []
 steepest_sko_permutations = []
@@ -190,41 +255,17 @@ for i in range(len(greedy_sko_optimal)):
 
 
 #plot quality vs similarity for greedy sko
-plt.scatter(greedy_sko_quality, sim_greedy_sko_avg, label='Average similarity to other solutions')
-plt.scatter(greedy_sko_quality, sim_greedy_sko_optimal, label='Similarity to the optimal solution')
-plt.title('Greedy Sko90')
-plt.xlabel('Objective Value')
-plt.ylabel('Similarity')
-plt.legend()
-plt.show()
+plot_similarity_pair(greedy_sko_quality, sim_greedy_sko_avg, sim_greedy_sko_optimal, 'Greedy Sko90')
 
 
 #plot quality vs similarity for greedy tai
-plt.scatter(greedy_tai_quality, sim_greedy_tai_avg, label='Average similarity to other solutions')
-plt.scatter(greedy_tai_quality, sim_greedy_tai_optimal, label='Similarity to the optimal solution')
-plt.title('Greedy Tai256c')
-plt.xlabel('Objective Value')
-plt.ylabel('Similarity')
-plt.legend()
-plt.show()
+plot_similarity_pair(greedy_tai_quality, sim_greedy_tai_avg, sim_greedy_tai_optimal, 'Greedy Tai256c')
 
 #plot quality vs similarity for steepest sko
-plt.scatter(steepest_sko_quality, sim_steepest_sko_avg, label='Average similarity to other solutions')
-plt.scatter(steepest_sko_quality, sim_steepest_sko_optimal, label='Similarity to the optimal solution')
-plt.title('Steepest Sko90')
-plt.xlabel('Objective Value')
-plt.ylabel('Similarity')
-plt.legend()
-plt.show()
+plot_similarity_pair(steepest_sko_quality, sim_steepest_sko_avg, sim_steepest_sko_optimal, 'Steepest Sko90')
 
 #plot quality vs similarity for steepest tai
-plt.scatter(steepest_tai_quality, sim_steepest_tai_avg, label='Average similarity to other solutions')
-plt.scatter(steepest_tai_quality, sim_steepest_tai_optimal, label='Similarity to the optimal solution')
-plt.title('Steepest Tai256c')
-plt.xlabel('Objective Value')
-plt.ylabel('Similarity')
-plt.legend()
-plt.show()
+plot_similarity_pair(steepest_tai_quality, sim_steepest_tai_avg, sim_steepest_tai_optimal, 'Steepest Tai256c')
 
 
 
