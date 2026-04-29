@@ -68,35 +68,150 @@ image_size = (8,5)
 plt.figure(figsize=image_size)
 
 
+# for i, alg in enumerate(times):
+#     y = []
+#     stds = []
+#     for instance in instances:
+#         mean = np.mean(times[alg][instance]) / 1e6
+#         std = np.std(times[alg][instance]) / 1e6
+#         y.append(mean)
+#         stds.append(std)
+#     y = np.array(y)
+#     stds = np.array(stds)
+
+#     jitter = (i - len(times)/2) * jitter_strength
+#     x_jittered = x + jitter
+
+#     plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
+# # add colors to the lines
+
+# plt.xticks(x, instances)
+# plt.yscale("log")
+# plt.legend()
+# plt.title("Execution Time ↓")
+# plt.ylabel("Time [ms]")
+# plt.savefig("ex2/time_aggregate_8.png")
+# plt.figure(figsize=image_size)
+
+# for i, alg in enumerate(times):
+#     y = []
+#     stds = []
+#     for instance in instances:
+#         improvment = (np.array(fitnesses[alg][instance]) - optima[instance]) / optima[instance]
+#         f = improvment
+#         # print(f)
+#         mean = np.mean(f)
+#         # print(alg, mean)
+#         std = np.std(f)
+#         y.append(mean)
+#         stds.append(std)
+#     y = np.array(y)
+#     stds = np.array(stds)
+
+#     jitter = (i - len(times)/2) * jitter_strength
+#     x_jittered = x + jitter
+
+#     plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
+
+# plt.xticks(x, instances)
+# # plt.yscale("log")
+# plt.legend()
+# plt.title("Quality ↓")
+# plt.ylabel("Ratio to optimum [q]")
+# plt.savefig("ex2/quality_aggregate_8.png")
+# plt.show()
+# plt.figure(figsize=image_size)
+
+# for i, alg in enumerate(times):
+#     y = []
+#     stds = []
+#     for instance in instances:
+#         improvment = (np.array(initial_fitness[alg][instance]) - np.array(fitnesses[alg][instance])) / optima[instance]
+#         f = improvment / (np.array(times[alg][instance]) / 1e6)
+#         # print(f)
+#         mean = np.mean(f)
+#         # print(alg, mean)
+#         std = np.std(f)
+#         y.append(mean)
+#         stds.append(std)
+#     y = np.array(y)
+#     stds = np.array(stds)
+
+#     jitter = (i - len(times)/2) * jitter_strength
+#     x_jittered = x + jitter
+
+#     plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
+
+# plt.xticks(x, instances)
+# plt.yscale("symlog",  linthresh=0.0001)
+# plt.legend()
+# plt.title("Efficiency ↑")
+# plt.ylabel("Improvment to quality from initial solution over time [q/ms]")
+# plt.savefig("ex2/efficiency_aggregate_8.png")
+# plt.show()
+
+# plt.figure(figsize=image_size)
+
+# for i, alg in enumerate(iterations):
+#     if alg not in ["steepest", "greedy"]:
+#         continue
+#     y = []
+#     stds = []
+#     for instance in instances:
+#         mean = np.mean(iterations[alg][instance])
+#         std = np.std(iterations[alg][instance])
+#         y.append(mean)
+#         stds.append(std)
+#     y = np.array(y)
+#     stds = np.array(stds)
+
+#     jitter = (i - len(iterations)/2) * jitter_strength
+#     x_jittered = x + jitter
+
+#     plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
+
+# plt.xticks(x, instances)
+# plt.yscale("log")
+# plt.title("Iterations")
+# plt.legend()
+# plt.savefig("ex2/iterations_aggregate_8.png")
+# plt.show()
+
+# plt.figure(figsize=image_size)
+
+# for i, alg in enumerate(evaluations):
+#     y = []
+#     stds = []
+#     for instance in instances:
+#         mean = np.mean(evaluations[alg][instance])
+#         std = np.std(evaluations[alg][instance])
+#         y.append(mean)
+#         stds.append(std)
+#     y = np.array(y)
+#     stds = np.array(stds)
+
+#     jitter = (i - len(evaluations)/2) * jitter_strength
+#     x_jittered = x + jitter
+
+#     plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
+
+# plt.xticks(x, instances)
+# plt.yscale("log")
+# plt.title("Evaluations")
+# plt.legend()
+# plt.savefig("ex2/evaluations_aggregate_8.png")
+# plt.show()
+
+inst = ["sko90", "tai100b", "sko100a", "tai150a", "tai256c"]
+x = np.arange(len(inst))
 for i, alg in enumerate(times):
+    if alg not in ["steepest", "greedy", "tabuSearch", "simulatedAnnealing"]:
+        continue
     y = []
     stds = []
     for instance in instances:
-        mean = np.mean(times[alg][instance]) / 1e6
-        std = np.std(times[alg][instance]) / 1e6
-        y.append(mean)
-        stds.append(std)
-    y = np.array(y)
-    stds = np.array(stds)
-
-    jitter = (i - len(times)/2) * jitter_strength
-    x_jittered = x + jitter
-
-    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
-# add colors to the lines
-
-plt.xticks(x, instances)
-plt.yscale("log")
-plt.legend()
-plt.title("Execution Time ↓")
-plt.ylabel("Time [ms]")
-plt.savefig("ex2/time_aggregate_8.png")
-plt.figure(figsize=image_size)
-
-for i, alg in enumerate(times):
-    y = []
-    stds = []
-    for instance in instances:
+        if instance not in ["sko90", "tai100b", "sko100a", "tai150a", "tai256c"]:
+            continue
         improvment = (np.array(fitnesses[alg][instance]) - optima[instance]) / optima[instance]
         f = improvment
         # print(f)
@@ -109,95 +224,15 @@ for i, alg in enumerate(times):
     stds = np.array(stds)
 
     jitter = (i - len(times)/2) * jitter_strength
-    x_jittered = x + jitter
+    x_jittered = x
 
     plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
 
-plt.xticks(x, instances)
+plt.xticks(x, inst)
 # plt.yscale("log")
 plt.legend()
 plt.title("Quality ↓")
 plt.ylabel("Ratio to optimum [q]")
-plt.savefig("ex2/quality_aggregate_8.png")
+plt.savefig("ex2/quality_aggregate_8_big_instances.png")
 plt.show()
 plt.figure(figsize=image_size)
-
-for i, alg in enumerate(times):
-    y = []
-    stds = []
-    for instance in instances:
-        improvment = (np.array(initial_fitness[alg][instance]) - np.array(fitnesses[alg][instance])) / optima[instance]
-        f = improvment / (np.array(times[alg][instance]) / 1e6)
-        # print(f)
-        mean = np.mean(f)
-        # print(alg, mean)
-        std = np.std(f)
-        y.append(mean)
-        stds.append(std)
-    y = np.array(y)
-    stds = np.array(stds)
-
-    jitter = (i - len(times)/2) * jitter_strength
-    x_jittered = x + jitter
-
-    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
-
-plt.xticks(x, instances)
-plt.yscale("symlog",  linthresh=0.0001)
-plt.legend()
-plt.title("Efficiency ↑")
-plt.ylabel("Improvment to quality from initial solution over time [q/ms]")
-plt.savefig("ex2/efficiency_aggregate_8.png")
-plt.show()
-
-plt.figure(figsize=image_size)
-
-for i, alg in enumerate(iterations):
-    if alg not in ["steepest", "greedy"]:
-        continue
-    y = []
-    stds = []
-    for instance in instances:
-        mean = np.mean(iterations[alg][instance])
-        std = np.std(iterations[alg][instance])
-        y.append(mean)
-        stds.append(std)
-    y = np.array(y)
-    stds = np.array(stds)
-
-    jitter = (i - len(iterations)/2) * jitter_strength
-    x_jittered = x + jitter
-
-    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
-
-plt.xticks(x, instances)
-plt.yscale("log")
-plt.title("Iterations")
-plt.legend()
-plt.savefig("ex2/iterations_aggregate_8.png")
-plt.show()
-
-plt.figure(figsize=image_size)
-
-for i, alg in enumerate(evaluations):
-    y = []
-    stds = []
-    for instance in instances:
-        mean = np.mean(evaluations[alg][instance])
-        std = np.std(evaluations[alg][instance])
-        y.append(mean)
-        stds.append(std)
-    y = np.array(y)
-    stds = np.array(stds)
-
-    jitter = (i - len(evaluations)/2) * jitter_strength
-    x_jittered = x + jitter
-
-    plt.errorbar(x_jittered, y, yerr=stds, label=alg, marker=".", color=colors.get(alg, "black"))
-
-plt.xticks(x, instances)
-plt.yscale("log")
-plt.title("Evaluations")
-plt.legend()
-plt.savefig("ex2/evaluations_aggregate_8.png")
-plt.show()
